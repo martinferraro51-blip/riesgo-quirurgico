@@ -180,13 +180,18 @@ REGLA CRÍTICA SOBRE DATOS FALTANTES:
 - Nunca escribas "Asintomático/a" a menos que el usuario explícitamente lo haya dicho.
 - Nunca asumas "Sin particularidades" en examen físico a menos que fue explícitamente informado.
 
+REGLA SOBRE CAPACIDAD FUNCIONAL:
+- Si la capacidad funcional es ≥4 METs, clasificarla como "buena" o "conservada", nunca "excelente".
+- En la conclusión usar expresiones medidas como "capacidad funcional conservada (≥4 METs)" o "buena capacidad funcional".
+- Reservar "excelente" solo si el paciente refiere actividad física intensa sin limitaciones.
+
 Para el pedido inicial, respondé ÚNICAMENTE con JSON válido (sin markdown, sin backticks) con esta estructura:
-{"procedimiento_riesgo":"bajo|intermedio|alto","procedimiento_riesgo_justificacion":"explicación breve","rcri_score":0,"rcri_items":["lista de ítems positivos del RCRI"],"rcri_riesgo":"muy bajo|bajo|moderado|alto","rcri_mace":"<3.9%|6.0%|10.1%|>15%","capacidad_funcional":"excelente|buena|moderada|pobre|no evaluable","factores_esc":["factores ESC 2022"],"factores_sac":["factores SAC"],"riesgo_global":"bajo|intermedio|alto","riesgo_global_justificacion":"fundamentación","estudios_adicionales":"recomendaciones","aptitud":"apto|apto con condiciones|diferir","conclusion":"Texto completo de conclusión en tercera persona, lenguaje médico formal. Mínimo 4 oraciones.","antecedentes_extraidos":"resumen","sintomas_extraidos":"síntomas o No informado","medicacion_extraida":"medicación o No refiere","alergias_extraidas":"alergias o No refiere","examen_fisico_extraido":"hallazgos o No informado","ecg_extraido":"ECG o No informado","estudios_complementarios_extraidos":"estudios o No informado"}
+{"procedimiento_riesgo":"bajo|intermedio|alto","procedimiento_riesgo_justificacion":"explicación breve","rcri_score":0,"rcri_items":["lista de ítems positivos del RCRI"],"rcri_riesgo":"muy bajo|bajo|moderado|alto","rcri_mace":"<1%|1-1.3%|4-7%|9-11%","capacidad_funcional":"excelente|buena|moderada|pobre|no evaluable","factores_esc":["factores ESC 2022"],"factores_sac":["factores SAC"],"riesgo_global":"bajo|intermedio|alto","riesgo_global_justificacion":"fundamentación","estudios_adicionales":"recomendaciones","aptitud":"apto|apto con condiciones|diferir","conclusion":"Texto completo de conclusión en tercera persona, lenguaje médico formal. Mínimo 4 oraciones.","antecedentes_extraidos":"resumen","sintomas_extraidos":"síntomas o No informado","medicacion_extraida":"medicación o No refiere","alergias_extraidas":"alergias o No refiere","examen_fisico_extraido":"hallazgos o No informado","ecg_extraido":"ECG o No informado","estudios_complementarios_extraidos":"estudios o No informado"}
 
 Para actualizaciones vía chat, respondé SOLO con los campos que cambian dentro de <json_update>.
 
 Criterios RCRI: 1.Cardiopatía isquémica 2.IC 3.ACV 4.DBT insulino-req 5.IRC(Cr>2/FG<30) 6.Cirugía alto riesgo
-RCRI: 0=muy bajo MACE<3.9%, 1=bajo 6%, 2=moderado 10.1%, ≥3=alto >15%
+RCRI (Lee 1999): 0 puntos = bajo (<1% MACE), 1 punto = bajo (1-1.3% MACE), 2 puntos = intermedio (4-7% MACE), ≥3 puntos = alto (9-11% MACE). Nota: AHA/ACC 2024 define RCRI >1 como riesgo elevado (MACE ≥1%).
 Riesgo procedimiento ESC 2022: Bajo(<1%):superficial,mama,dental,tiroides,ojo. Intermedio(1-5%):intraperitoneal,intratorácica,ortopedia mayor. Alto(>5%):aorta/vascular mayor,duodeno-pancreática,hepática,neumonectomía.
 Si no hay datos suficientes para un ítem, no lo marques positivo.`;
 
