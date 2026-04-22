@@ -37,7 +37,7 @@ body { font-family: 'Segoe UI', -apple-system, sans-serif; background: #f5f5f5; 
 .chat-bar { display: flex; gap: 6px; padding: 8px 12px; border-top: 1px solid #eee; background: #fafafa; }
 .chat-bar input { flex: 1; }
 /* Grid */
-.strat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.strat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; }
 .strat-item { text-align: center; padding: 10px 6px; border-radius: 8px; background: #fafafa; border: 1px solid #eee; }
 .strat-label { font-size: 10px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
 .strat-sub { font-size: 9.5px; color: #9ca3af; margin-top: 3px; line-height: 1.2; }
@@ -107,7 +107,7 @@ body { font-family: 'Segoe UI', -apple-system, sans-serif; background: #f5f5f5; 
           <div class="col"><label class="lbl">Fecha stent (si aplica)</label><input class="inp" id="fStentFecha" type="month" placeholder="Ej: 2024-06"></div>
         </div>
         <div class="row">
-          <div class="col"><label class="lbl">ASA</label><select class="sel" id="fASA"><option value="No definido">No definido</option><option value="ASA I">ASA I - Sano</option><option value="ASA II">ASA II - Enfermedad sistémica leve</option><option value="ASA III">ASA III - Enfermedad sistémica grave</option><option value="ASA IV">ASA IV - Amenaza constante para la vida</option></select></div>
+          <div class="col"><label class="lbl">ASA (auto)</label><select class="sel" id="fASA"><option value="Automático">Automático (sugerido por IA)</option><option value="ASA I">ASA I - Sano (override)</option><option value="ASA II">ASA II - Enfermedad sistémica leve (override)</option><option value="ASA III">ASA III - Enfermedad sistémica grave (override)</option><option value="ASA IV">ASA IV - Amenaza constante para la vida (override)</option></select></div>
           <div class="col"><label class="lbl">Tipo de anestesia (si se conoce)</label><select class="sel" id="fAnestesia"><option value="No definido">No definido</option><option value="General">General</option><option value="Regional/Neuraxial">Regional / Neuraxial</option><option value="Sedación">Sedación</option><option value="Local">Local</option><option value="Combinada">Combinada (general + regional)</option></select></div>
         </div>
         <div class="row">
@@ -226,13 +226,20 @@ CAMPOS ESTRUCTURADOS ADICIONALES:
   * BMS: mínimo 1 mes de doble antiagregación antes de suspender clopidogrel.
   * DES: mínimo 3-6 meses de doble antiagregación.
   * Si la cirugía cae dentro de estos períodos, considerar diferir o mantener doble antiagregación según riesgo hemorrágico.
-- ASA (American Society of Anesthesiologists): si se informa, incluirlo en la estratificación. ASA ≥III es factor de riesgo perioperatorio independiente.
+- ASA (American Society of Anesthesiologists): CALCULARLO AUTOMÁTICAMENTE en base al estado clínico del paciente, salvo que se informe un override manual (en ese caso usar el valor manual pero igual calcular el sugerido). ASA ≥III es factor de riesgo perioperatorio independiente.
+  CRITERIOS ASA (asignar el más alto que aplique):
+  * ASA I: paciente sano, sin enfermedades sistémicas, sin tabaquismo activo ni consumo problemático de alcohol, IMC <30.
+  * ASA II: enfermedad sistémica LEVE y bien controlada, sin limitación funcional significativa. Ejemplos: HTA controlada, DBT2 controlada sin complicaciones, dislipemia, tabaquista actual, obesidad leve-moderada (IMC 30-39), embarazo, EPOC leve, asma controlada, ex-tabaquista reciente, consumo social de alcohol.
+  * ASA III: enfermedad sistémica GRAVE con limitación funcional sustantiva pero no amenaza vital inmediata. Ejemplos: DBT mal controlada o con daño de órgano blanco, HTA mal controlada, EPOC moderado-grave, IMC ≥40, FEVI 30-40%, IAM/ACV/TIA/stent >3 meses, IRC en diálisis programada, hepatopatía activa, arritmia crónica estable, marcapasos, dependencia alcohólica, capacidad funcional pobre (<4 METs) por enfermedad crónica.
+  * ASA IV: enfermedad sistémica grave que constituye amenaza CONSTANTE para la vida. Ejemplos: IAM/ACV/TIA <3 meses, isquemia miocárdica activa o angina inestable, IC descompensada, FEVI <30%, valvulopatía severa sintomática, arritmia severa, sepsis reciente, IRA, IRC terminal sin diálisis, shock.
+  * Si hay condiciones cardíacas activas (stoppers), el ASA es ≥IV.
+  * En caso de duda entre dos categorías, elegir la más alta si hay factores agravantes (edad >75, fragilidad, múltiples comorbilidades).
 - Tipo de anestesia: la anestesia general conlleva mayor riesgo hemodinámico que la regional/neuraxial. Mencionarlo en la evaluación si se conoce.
 - LIMITACIONES DEL RCRI: el RCRI no considera edad, tipo específico de cirugía más allá de alto riesgo, ni fragilidad.
 - ACS-NSQIP: si se informa el porcentaje de riesgo del ACS-NSQIP Surgical Risk Calculator, integrarlo en la estratificación y mencionarlo en la conclusión como complemento del RCRI. Si NO se informa, no mencionarlo en la conclusión (solo queda en bibliografía).
 
 Para el pedido inicial, respondé ÚNICAMENTE con JSON válido (sin markdown, sin backticks) con esta estructura:
-{"procedimiento_riesgo":"bajo|intermedio|alto","procedimiento_riesgo_justificacion":"explicación breve","rcri_score":0,"rcri_items":["lista de ítems positivos del RCRI"],"rcri_riesgo":"muy bajo|bajo|moderado|alto","rcri_mace":"<1%|1-1.3%|4-7%|9-11%","capacidad_funcional":"excelente|buena|moderada|pobre|no evaluable","factores_esc":["factores ESC 2022"],"factores_sac":["factores SAC"],"riesgo_global":"bajo|intermedio|alto","riesgo_global_justificacion":"fundamentación","estudios_adicionales":"recomendaciones","aptitud":"apto|apto con condiciones|diferir","conclusion":"Texto completo de conclusión en tercera persona, lenguaje médico formal. Mínimo 4 oraciones.","antecedentes_extraidos":"resumen","sintomas_extraidos":"síntomas o No informado","medicacion_extraida":"medicación o No refiere","alergias_extraidas":"alergias o No refiere","examen_fisico_extraido":"hallazgos o No informado","ecg_extraido":"ECG o No informado","estudios_complementarios_extraidos":"estudios o No informado","condiciones_activas":["lista de condiciones activas detectadas"],"recomendaciones_perioperatorias":"texto con recomendaciones de manejo perioperatorio de medicación"}
+{"procedimiento_riesgo":"bajo|intermedio|alto","procedimiento_riesgo_justificacion":"explicación breve","rcri_score":0,"rcri_items":["lista de ítems positivos del RCRI"],"rcri_riesgo":"muy bajo|bajo|moderado|alto","rcri_mace":"<1%|1-1.3%|4-7%|9-11%","capacidad_funcional":"excelente|buena|moderada|pobre|no evaluable","factores_esc":["factores ESC 2022"],"factores_sac":["factores SAC"],"riesgo_global":"bajo|intermedio|alto","riesgo_global_justificacion":"fundamentación","estudios_adicionales":"recomendaciones","aptitud":"apto|apto con condiciones|diferir","conclusion":"Texto completo de conclusión en tercera persona, lenguaje médico formal. Mínimo 4 oraciones.","antecedentes_extraidos":"resumen","sintomas_extraidos":"síntomas o No informado","medicacion_extraida":"medicación o No refiere","alergias_extraidas":"alergias o No refiere","examen_fisico_extraido":"hallazgos o No informado","ecg_extraido":"ECG o No informado","estudios_complementarios_extraidos":"estudios o No informado","condiciones_activas":["lista de condiciones activas detectadas"],"recomendaciones_perioperatorias":"texto con recomendaciones de manejo perioperatorio de medicación","asa_sugerido":"ASA I|ASA II|ASA III|ASA IV","asa_justificacion":"explicación breve (1 oración) del porqué del ASA asignado, citando los hallazgos clínicos que lo sustentan"}
 
 Para actualizaciones vía chat, respondé SOLO con los campos que cambian dentro de <json_update>.
 
@@ -313,9 +320,15 @@ function applyResult(parsed) {
 
 function renderStratification() {
   if (!result) return;
+  const asaManual = $('fASA').value;
+  const asaFinal = (asaManual === 'Automático') ? (result.asa_sugerido || 'No evaluable') : asaManual;
+  const asaSub = (asaManual === 'Automático')
+    ? (result.asa_justificacion || '').substring(0,70)
+    : ((result.asa_sugerido && result.asa_sugerido !== asaManual) ? ('IA sugiere '+result.asa_sugerido) : (result.asa_justificacion || '').substring(0,70));
   const items = [
     { lbl: 'Procedimiento', val: result.procedimiento_riesgo, sub: result.procedimiento_riesgo_justificacion },
     { lbl: 'RCRI', val: result.rcri_score + ' — ' + result.rcri_riesgo, sub: 'MACE ' + result.rcri_mace },
+    { lbl: 'ASA', val: asaFinal, sub: asaSub },
     { lbl: 'Riesgo Global', val: result.riesgo_global, sub: (result.riesgo_global_justificacion||'').substring(0,70) },
   ];
   $('stratGrid').innerHTML = items.map(it => `
@@ -367,7 +380,11 @@ async function analyzeWithAI() {
     if (val('fStentFecha')) stentInfo += ' (fecha: ' + val('fStentFecha') + ')';
     parts.push(stentInfo);
   }
-  if ($('fASA').value !== 'No definido') parts.push('Clasificación ASA: ' + $('fASA').value);
+  if ($('fASA').value === 'Automático') {
+    parts.push('Clasificación ASA: calcular automáticamente en base al estado clínico del paciente (campos asa_sugerido y asa_justificacion)');
+  } else {
+    parts.push('Clasificación ASA: ' + $('fASA').value + ' (override manual — usar este valor pero igualmente devolver asa_sugerido calculado para comparación)');
+  }
   if ($('fAnestesia').value !== 'No definido') parts.push('Tipo de anestesia previsto: ' + $('fAnestesia').value);
   if (val('fNSQIP')) parts.push('ACS-NSQIP Estimated Risk: ' + val('fNSQIP') + '%');
   const exParts = [];
@@ -484,7 +501,7 @@ body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;color:#1a1a1a;m
 <div class="field"><b>Antecedentes:</b> ${$('eAnt').value||'No informado'}</div>
 <div class="field"><b>Medicación:</b> ${$('eMed').value||'No refiere'}</div>
 <div class="field"><b>Alergias:</b> ${$('eAler').value||'No refiere'}</div>
-<div class="field"><b>Tabaquismo:</b> ${$('fTabaco').value}</div>${val('fFEVI')?'<div class="field"><b>FEVI:</b> '+val('fFEVI')+'%</div>':''}${$('fStent').value!=='No'?'<div class="field"><b>Stent/PCI:</b> '+$('fStent').value+(val('fStentFecha')?' ('+val('fStentFecha')+')':'')+'</div>':''}${$('fASA').value!=='No definido'?'<div class="field"><b>ASA:</b> '+$('fASA').value+'</div>':''}${$('fAnestesia').value!=='No definido'?'<div class="field"><b>Anestesia prevista:</b> '+$('fAnestesia').value+'</div>':''}
+<div class="field"><b>Tabaquismo:</b> ${$('fTabaco').value}</div>${val('fFEVI')?'<div class="field"><b>FEVI:</b> '+val('fFEVI')+'%</div>':''}${$('fStent').value!=='No'?'<div class="field"><b>Stent/PCI:</b> '+$('fStent').value+(val('fStentFecha')?' ('+val('fStentFecha')+')':'')+'</div>':''}${(function(){const manual=$('fASA').value;const sug=result&&result.asa_sugerido?result.asa_sugerido:'';const just=result&&result.asa_justificacion?result.asa_justificacion:'';if(manual==='Automático'&&sug){return '<div class="field"><b>ASA:</b> '+sug+(just?' — <i>'+just+'</i>':'')+'</div>';}else if(manual!=='Automático'){let txt='<div class="field"><b>ASA:</b> '+manual;if(sug&&sug!==manual){txt+=' (sugerido por IA: '+sug+(just?' — '+just:'')+')';}return txt+'</div>';}return '';})()}${$('fAnestesia').value!=='No definido'?'<div class="field"><b>Anestesia prevista:</b> '+$('fAnestesia').value+'</div>':''}
 <div class="field"><b>Examen físico:</b> ${$('eExam').value||'No informado'}</div>
 <div class="field"><b>ECG:</b> ${$('eEcg').value||'No informado'}</div>
 <div class="field"><b>Estudios complementarios:</b> ${$('eComp').value||'No informado'}</div>
